@@ -1,0 +1,34 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String  @unique
+  email    String  @unique
+  nickname String
+  picture  String  @default("/avatar/1.png")
+  sender   Friend? @relation("sender")
+  receiver Friend? @relation("receiver")
+}
+
+model Friend {
+  id         String       @unique @default(uuid())
+  sender     User         @relation("sender", fields: [senderId], references: [id])
+  senderId   String       @unique
+  receiver   User         @relation("receiver", fields: [receiverId], references: [id])
+  receiverId String       @unique
+  status     FriendStatus @default(PENDING)
+}
+
+enum FriendStatus {
+  ACCEPTED
+  PENDING
+}
