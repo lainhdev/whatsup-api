@@ -12,16 +12,25 @@ import {
 import { FriendService } from './friend.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { SessionContainer } from 'supertokens-node/recipe/session';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Controller('friend')
 export class FriendController {
-  constructor(private readonly friendService: FriendService) {}
+  constructor(
+    private readonly friendService: FriendService,
+    private event: EventEmitter2,
+  ) {}
 
   @Post()
   @UseGuards(new AuthGuard())
-  create(@Body('email') email: string, @Session() session: SessionContainer) {
+  async create(
+    @Body('email') email: string,
+    @Session() session: SessionContainer,
+  ) {
     const userId = session.getUserId();
-    return this.friendService.create(userId, email);
+    const friend = await this.friendService.create(userId, email);
+    this.event.emit('friend.create', friend);
+    return friend;
   }
 
   @Get()
@@ -39,15 +48,19 @@ export class FriendController {
 
   @Patch(':id')
   @UseGuards(new AuthGuard())
-  update(@Param('id') id: string, @Session() session: SessionContainer) {
+  async update(@Param('id') id: string, @Session() session: SessionContainer) {
     const userId = session.getUserId();
-    return this.friendService.update(id, userId);
+    const friend = await this.friendService.update(id, userId);
+    this.event.emit('friend.update', friend);
+    return friend;
   }
 
   @Delete(':id')
   @UseGuards(new AuthGuard())
-  remove(@Session() session: SessionContainer, @Param('id') id: string) {
+  async remove(@Session() session: SessionContainer, @Param('id') id: string) {
     const userId = session.getUserId();
-    return this.friendService.remove(id, userId);
+    const friend = await this.friendService.remove(id, userId);
+    this.event.emit('friend.delete', friend);
+    return friend;
   }
 }

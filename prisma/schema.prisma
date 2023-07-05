@@ -11,24 +11,46 @@ datasource db {
 }
 
 model User {
-  id       String  @unique
-  email    String  @unique
+  id       String    @unique
+  email    String    @unique
   nickname String
-  picture  String  @default("/avatar/1.png")
-  sender   Friend? @relation("sender")
-  receiver Friend? @relation("receiver")
+  picture  String    @default("/avatar/1.png")
+  sender   Friend?   @relation("sender")
+  receiver Friend?   @relation("receiver")
+  messages Message[]
 }
 
 model Friend {
-  id         String       @unique @default(uuid())
-  sender     User         @relation("sender", fields: [senderId], references: [id])
-  senderId   String       @unique
-  receiver   User         @relation("receiver", fields: [receiverId], references: [id])
-  receiverId String       @unique
-  status     FriendStatus @default(PENDING)
+  id           String        @unique @default(uuid())
+  sender       User          @relation("sender", fields: [senderId], references: [id])
+  senderId     String        @unique
+  receiver     User          @relation("receiver", fields: [receiverId], references: [id])
+  receiverId   String        @unique
+  status       FriendStatus  @default(PENDING)
+  Conversation Conversation?
 }
 
 enum FriendStatus {
   ACCEPTED
   PENDING
+}
+
+model Conversation {
+  id          String    @unique @default(cuid())
+  createdBy   Friend    @relation(fields: [friendId], references: [id])
+  friendId    String    @unique
+  messages    Message[] @relation(name: "conversation")
+  lastMessage Message?  @relation(name: "lastOfConversation")
+}
+
+model Message {
+  id                   String        @unique @default(cuid())
+  text                 String
+  author               User          @relation(fields: [authorId], references: [id])
+  authorId             String
+  createdAt            DateTime      @default(now())
+  conversation         Conversation  @relation(name: "conversation", fields: [conversationId], references: [id])
+  conversationId       String
+  lastOfConversation   Conversation? @relation(name: "lastOfConversation", fields: [lastOfConversationId], references: [id])
+  lastOfConversationId String?       @unique
 }

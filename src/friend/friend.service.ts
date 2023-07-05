@@ -73,6 +73,10 @@ export class FriendService {
       data: {
         status: FriendStatus.ACCEPTED,
       },
+      include: {
+        receiver: true,
+        sender: true,
+      },
     });
   }
 

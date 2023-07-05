@@ -71,7 +71,9 @@ export class SupertokensService {
             },
           },
         }),
-        Session.init(),
+        Session.init({
+          exposeAccessTokenToFrontendInCookieBasedAuth: true,
+        }),
         Dashboard.init(),
       ],
     });
