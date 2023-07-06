@@ -1,7 +1,7 @@
 import { Gateway } from './../gateway/gateway';
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { Conversation, Friend, Message } from '@prisma/client';
+import { Friend } from '@prisma/client';
 import { IConversationPayload } from './interface/IConversationPayload';
 import { IMessagePayload } from './interface/IMessagePayload';
 
@@ -21,7 +21,6 @@ export class EventService {
   friendUpdate(payload: Friend) {
     console.log('friend.update');
     const senderSocket = this.gateway.sessions.getUserSocket(payload.senderId);
-    console.log(senderSocket.userId);
     senderSocket && senderSocket.emit('onFriendAccepted', payload);
   }
 
@@ -46,7 +45,7 @@ export class EventService {
       payload.createdBy.receiverId,
     );
     senderSocket && senderSocket.join(`conversation-${payload.id}`);
-    receiverSocket && receiverSocket.emit(`conversation-${payload.id}`);
+    receiverSocket && receiverSocket.join(`conversation-${payload.id}`);
 
     this.gateway.server
       .to(`conversation-${payload.id}`)
