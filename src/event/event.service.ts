@@ -57,6 +57,6 @@ export class EventService {
     console.log('message.create');
     this.gateway.server
       .to(`conversation-${payload.conversationId}`)
-      .emit('receivedMessage', payload);
+      .emit('onReceivedMessage', payload);
   }
 }
